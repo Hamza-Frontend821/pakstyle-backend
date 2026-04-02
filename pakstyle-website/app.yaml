@@ -1,0 +1,63 @@
+# 🌐 GOOGLE APP ENGINE CONFIG - PAKSTYLE
+# Full-stack Node.js + CloudSQL MySQL + Static Frontend
+
+runtime: nodejs20
+env: standard
+
+# Automatic scaling
+automatic_scaling:
+  min_instances: 1
+  max_instances: 10
+  target_cpu_utilization: 0.65
+
+# Env vars (CloudSQL injected)
+env_variables:
+  PORT: '8080'
+
+# CloudSQL connection (unix socket - secure!)
+beta_settings:
+  cloud_sql_instances: '$INSTANCE_CONNECTION_NAME'
+
+# Static frontend files (index.html + admin)
+handlers:
+# Frontend store
+- url: /$
+  static_files: index.html
+  upload: index.html
+  secure: always
+  redirect_http_response_code: 301
+
+- url: /pakstyle-admin\.html$
+  static_files: pakstyle-admin.html  
+  upload: pakstyle-admin.html
+  secure: always
+  redirect_http_response_code: 301
+
+# Static assets (if any CSS/JS extracted)
+- url: /(.*\.(css|js|png|jpg|ico|svg|woff2?|ttf))
+  static_files: \1
+  upload: .*\.(css|js|png|jpg|ico|svg|woff2?|ttf)$
+  secure: always
+
+# Backend APIs  
+- url: /api/.*
+  script: auto
+  secure: always
+  login: admin  # Protect APIs
+
+# Fallback to index.html (SPA-style)
+- url: /.*
+  static_files: index.html
+  upload: index.html
+  secure: always
+
+# Skip files
+skip_files:
+- ^(.git|node_modules|TODO\.md)$
+
+# Resources (generous for e-commerce)
+resources:
+  cpu: 2
+  memory_gb: 2
+  disk_size_gb: 10
+
